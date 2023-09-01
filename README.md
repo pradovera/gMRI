@@ -2,15 +2,15 @@
 Lightweight implementation of the MRI and gMRI algorithms
 
 ## Prerequisites
-**RROMPy** requires
-* **numpy** and **scipy**;
-* **matplotlib**;
-* and other standard Python3 modules (**os**, **typing**, **time**, **datetime**, **abc**, **pickle**, **traceback**, **itertools**, ...).
+**gMRI** requires
+* **numpy**
+* **scipy**
+* other standard Python3 modules (**copy**, **warnings**, ...)
 
 ## Installing
 Clone the repository
 ```
-git clone http://c4science.ch/source/RROMPy.git
+git clone https://github.com/pradovera/gMRI.git
 ```
 enter the main folder and install the package by typing
 ```
