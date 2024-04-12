@@ -1,5 +1,7 @@
-from .mri import baseMRI, MRI, gMRI, buildMRI, buildgMRI
+from .mri import MRI, gMRI
+from .build_mri import buildMRI, buildgMRI
 
-__all__ = ['baseMRI', 'MRI', 'gMRI', 'buildMRI', 'buildgMRI']
+__all__ = ['barycentricRationalFunction',
+           'MRI', 'gMRI', 'buildMRI', 'buildgMRI']
 
 

@@ -1,3 +1,4 @@
+from numbers import Number
 import numpy as np
 from copy import deepcopy as copy
 from warnings import catch_warnings
@@ -5,16 +6,64 @@ from warnings import catch_warnings
 __all__ = ['orthogonalizationEngine']
 
 class orthogonalizationEngine:
-    def __init__(self, energy_matrix = None):
+    def __init__(self, energy_matrix = 1.):
+        """
+        Initialize orthogonalizationEngine.
+        
+        Args:
+            energy_matrix(optional): energy matrix; defaults to identity.
+        """
         self.energy_matrix = energy_matrix
 
+    @property
+    def spacedim(self):
+        if isinstance(self.energy_matrix, Number): return None
+        return self.energy_matrix.shape[1]
+
+    def applyEnergy(self, a):
+        """
+        Left-multiply by energy matrix.
+        
+        Args:
+            a: vector or matrix;
+
+        Returns:
+            Resulting array.
+        """
+        if isinstance(self.energy_matrix, Number):
+            return self.energy_matrix * a
+        try:
+            return self.energy_matrix @ a
+        except:
+            Ma = self.energy_matrix @ a.reshape(self.spacedim, -1)
+            if a.ndim <= 1: return Ma.reshape(-1)
+            return Ma.reshape(-1, a.shape[1])
+
     def norm(self, a):
-        if self.energy_matrix is None: return np.linalg.norm(a, axis = 0)
-        return np.abs(np.sum((self.energy_matrix @ a) * a.conj(), axis = 0)) ** .5
+        """
+        Compute norms.
+        
+        Args:
+            a: vector or matrix (in which case the norm is computed
+                column-wise);
+
+        Returns:
+            Resulting norm.
+        """
+        return np.abs(np.sum(self.applyEnergy(a) * a.conj(), axis = 0)) ** .5
 
     def inner(self, a, b):
-        if self.energy_matrix is None: return b.conj().T @ a
-        return b.conj().T @ (self.energy_matrix @ a)
+        """
+        Compute inner products.
+        
+        Args:
+            a: right factor (vector or matrix);
+            b: left factor (vector or matrix);
+
+        Returns:
+            Resulting inner product.
+        """
+        return b.conj().T @ self.applyEnergy(a)
 
     def normalize(self, A):
         """
@@ -43,7 +92,7 @@ class orthogonalizationEngine:
                 basis, whether computation is ill-conditioned.
         """
         if n == -1: n = Q.shape[1]
-        r = np.zeros(n + 1, dtype = complex)
+        r = np.zeros(n + 1, dtype = a.dtype)
         if n > 0:
             Q = Q[:, : n]
             for j in range(2): # twice is enough!
@@ -54,7 +103,7 @@ class orthogonalizationEngine:
         ill_cond = False
         with catch_warnings(record = True) as w:
             snr = np.abs(r[-1]) / np.linalg.norm(r)
-            if len(w) > 0 or snr < np.finfo(np.complex).eps * len(r):
+            if len(w) > 0 or snr < np.finfo(r.dtype).eps * len(r):
                 ill_cond = True
                 r[-1] = 1.
             a = a / r[-1]
@@ -78,8 +127,8 @@ class orthogonalizationEngine:
         """
         Nh, N = A.shape
         B = copy(A)
-        V = np.zeros(A.shape, dtype = complex)
-        R = np.zeros((N, N), dtype = complex)
+        V = np.zeros(A.shape, dtype = A.dtype)
+        R = np.zeros((N, N), dtype = A.dtype)
         Q = copy(V) if Q0 is None else copy(Q0)
         for k in range(N):
             a = B[:, k]
