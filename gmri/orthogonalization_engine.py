@@ -37,7 +37,7 @@ class orthogonalizationEngine:
         except:
             Ma = self.energy_matrix @ a.reshape(self.spacedim, -1)
             if a.ndim <= 1: return Ma.reshape(-1)
-            return Ma.reshape(-1, a.shape[1])
+            return Ma.reshape(a.shape[0], -1)
 
     def norm(self, a):
         """
@@ -135,7 +135,7 @@ class orthogonalizationEngine:
             R[k, k] = self.norm(a)
             if Q0 is None and k < Nh:
                 for _ in range(genTrials):
-                    Q[:, k], _, illC = self.GS(np.random.randn(Nh), Q, k)
+                    Q[:, k], _, illC = self.GS(np.random.randn(Nh).astype(A.dtype), Q, k)
                     if not illC: break
             else:
                 illC = k >= Nh
