@@ -16,11 +16,15 @@ else:
     approximation_strategy = input(("Input approximation_strategy (allowed "
                                     "values: {})\n").format(allowed_tags))
 if len(sys.argv) > 2:
-    bisections = int(sys.argv[2])
+    bisections = sys.argv[2]
 else:
-    bisections = int(input(("Input the desired number of bisections (the "
-                            "final piecewise approximation will be supported "
-                            "on the union of 2^bisections subintervals):\n")))
+    bisections = input(("Input the desired number of bisections (the final "
+                        "piecewise approximation will be supported on the "
+                        "union of 2^bisections subintervals) or 'AUTO':\n"))
+if len(sys.argv) > 3:
+    eps_stab = float(sys.argv[3])
+else:
+    eps_stab = float(input("Input the desired stability tolerance:\n"))
 ###############################################################################
 k2s = [0., 1000.]
 
@@ -33,13 +37,13 @@ energyMatrix = solver.energyMatrix(0.)
 engine = orthogonalizationEngine(energyMatrix)
 
 if approximation_strategy == "MRI":
-    appList = buildMRI(solver.solve, energyMatrix, np.linspace(*k2s, 101),
-                       subdivisions = 2 ** bisections)
+    app = buildMRI(solver.solve, energyMatrix, np.linspace(*k2s, 101),
+                   eps_stab, subdivisions = 2 ** int(bisections))
 elif approximation_strategy == "gMRI":
-    appList = buildgMRI(solver.solve, energyMatrix, np.linspace(*k2s, 10001),
-                        1e-3, bisections = bisections)
-k2sGrid = [k2s[0]] + [np.max(app.supp) for app in appList]
-poles = [app.poles() for app in appList]
+    app = buildgMRI(solver.solve, energyMatrix, np.linspace(*k2s, 10001),
+                    1e-3, eps_stab, bisections = bisections)
+#poles = app.poles()
+poles = [app_.poles() for app_ in app.apps]
 
 ### POSTPROCESS
 poles_int_range = [np.ceil(max(1., k2s[0])) ** .5 * (domain_length / np.pi),
@@ -47,17 +51,17 @@ poles_int_range = [np.ceil(max(1., k2s[0])) ** .5 * (domain_length / np.pi),
 polesEx = (np.pi * np.arange(*poles_int_range) / domain_length) ** 2
 
 k2test = np.linspace(*k2s, 1001)
-normApp = np.empty(len(k2test))
+u_app = app(k2test, None)
+if isinstance(u_app, list):
+    normApp = np.empty(len(k2test))
+    for j, u_ in enumerate(u_app):
+        normApp[j] = np.linalg.norm(u_)
+else:
+    normApp = np.linalg.norm(u_app, axis = 0)
+
 k2stride = 25
 k2testCoarse = k2test[::k2stride]
 normEx = np.empty(len(k2testCoarse))
-    
-idxGrid = 0 # index of approximation that should be used
-for j, k2 in enumerate(k2test):
-    while idxGrid < len(k2sGrid) - 1 and k2 > k2sGrid[idxGrid + 1]:
-        idxGrid += 1
-    normApp[j] = np.linalg.norm(appList[idxGrid](k2, None)[:, 0])
-
 for j, k2 in enumerate(k2testCoarse):
     normEx[j] = engine.norm(solver.solve(k2)).flatten()
 
@@ -65,8 +69,8 @@ for j, k2 in enumerate(k2testCoarse):
 plt.figure()
 plt.semilogy(k2testCoarse, normEx, 'o')
 plt.semilogy(k2test, normApp)
-for app in appList:
-    plt.semilogy(app.supp[0], [np.min(normApp)] * app.supp.shape[1], 'x')
+for app_ in app.apps:
+    plt.semilogy(app_.supp[0], [np.min(normApp)] * app_.supp.shape[1], 'x')
 plt.legend(["Exact", "Approx"])
 plt.xlabel("k"), plt.ylabel("||u(k)||"), plt.grid()
 plt.show()
