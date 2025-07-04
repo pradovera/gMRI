@@ -10,7 +10,7 @@ Lightweight implementation of the MRI and gMRI algorithms
 ## Installing
 From the main folder, you can install the package by typing
 ```
-python setup.py install
+pip install .
 ```
 
 ## License

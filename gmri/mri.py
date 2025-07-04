@@ -110,7 +110,7 @@ class barycentricRationalFunction:
             residues = self(poles, ders = [0, 1])
             if mult == "snaps_ortho":
                 residues = self.sampler.samples_ortho.dot(residues)
-            return poles, residues
+            return poles, residues.T
         return poles
 
 class barycentricRationalFunctionMulti:
@@ -198,9 +198,9 @@ class barycentricRationalFunctionMulti:
             if np.any([r.shape[1] - residues_raw[0].shape[1]
                                                        for r in residues_raw]):
                 # shape of residues is incompatible: return as list
-                residues = sum([list(r.T) for r in residues_raw], [])
+                residues = sum([list(r) for r in residues_raw], [])
             else:
-                residues = np.concatenate(residues_raw, axis = -1)
+                residues = np.concatenate(residues_raw, axis = 0)
             return poles, residues
         return np.concatenate(vals)
 
