@@ -4,7 +4,7 @@ from .mri import barycentricRationalFunctionMulti, MRI, gMRI, StabilityError
 __all__ = ['buildMRI', 'buildgMRI']
 
 def buildMRI(sampler, energy_matrix, zs, eps_stab = None, subdivisions = 1,
-             **starting_sampler_data):
+             starting_sampler_data):
     """
     Build MRI with potential subdivisions of parameter range.
     
@@ -15,7 +15,7 @@ def buildMRI(sampler, energy_matrix, zs, eps_stab = None, subdivisions = 1,
             None, i.e., no stability check;
         subdivisions(optional): number of subdivisions of parameter range;
             defaults to 1, i.e., no subdivisions;
-        starting_sampler_data(optional): keyword arguments for loading
+        starting_sampler_data(optional): dict with keyword arguments for loading
             precomputed samples in samplingEngine;
 
     Returns:
@@ -28,7 +28,7 @@ def buildMRI(sampler, energy_matrix, zs, eps_stab = None, subdivisions = 1,
     mris = []
     for z in zs_eff: # loop over subdivisions
         mri = MRI(sampler, energy_matrix, z, eps_stab,
-                  **starting_sampler_data)
+                  starting_sampler_data)
         assert mri.sampler.nsamples == len(z), "Loading stored samples not implemented"
         try:
             mri.build(z)
@@ -39,7 +39,7 @@ def buildMRI(sampler, energy_matrix, zs, eps_stab = None, subdivisions = 1,
 
 def buildgMRI(sampler, energy_matrix, zs, tol, eps_stab = None, nmax = 1000,
               track_indicator = False, bisections = 0,
-              **starting_sampler_data):
+              starting_sampler_data):
     """
     Build gMRI with potential bisections of parameter range.
     
@@ -56,7 +56,7 @@ def buildgMRI(sampler, energy_matrix, zs, tol, eps_stab = None, nmax = 1000,
         bisections(optional): how many times to bisect parameter range;
             defaults to 0, i.e., no bisections; if "AUTO", bisect
             automatically whenever MRI building raises an error;
-        starting_sampler_data(optional): keyword arguments for loading
+        starting_sampler_data(optional): dict with keyword arguments for loading
             precomputed samples in samplingEngine;
 
     Returns:
@@ -67,7 +67,7 @@ def buildgMRI(sampler, energy_matrix, zs, tol, eps_stab = None, nmax = 1000,
     if bisections: track_indicator = False
     layer = 0
     to_split, mris = [], []
-    mri = gMRI(sampler, energy_matrix, eps_stab, **starting_sampler_data)
+    mri = gMRI(sampler, energy_matrix, eps_stab, starting_sampler_data)
     try:
         mri.build(zs, tol, nmax, track_indicator)
     except StabilityError as e:
@@ -100,7 +100,7 @@ def buildgMRI(sampler, energy_matrix, zs, tol, eps_stab = None, nmax = 1000,
                                 "samples_ortho": samples_ortho_}
                 zs_ = zs[np.logical_and(zs > zsamples_[0], zs < zsamples_[-1])]
                 new_mri = gMRI(sampler, energy_matrix, eps_stab,
-                               **sampler_data)
+                               sampler_data)
                 try:
                     new_mri.build(zs_, tol, nmax)
                 except StabilityError as e:

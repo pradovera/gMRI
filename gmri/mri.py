@@ -206,7 +206,7 @@ class barycentricRationalFunctionMulti:
 
 class MRI(barycentricRationalFunction):
     def __init__(self, sampler, energy_matrix, supp, eps_stab = None,
-                 **starting_sampler_data):
+                 starting_sampler_data):
         """
         Initialize minimal rational interpolant.
         
@@ -215,8 +215,8 @@ class MRI(barycentricRationalFunction):
             supp: support points (vector);
             eps_stab(optional): tolerance for SVD stability check; defaults to
                 None, i.e., no stability check;
-            starting_sampler_data(optional): keyword arguments for loading
-                precomputed samples in samplingEngine.
+            starting_sampler_data(optional): dict with keyword arguments for
+                loading precomputed samples in samplingEngine.
         """
         self.sampler = samplingEngine(sampler, energy_matrix)
         if len(starting_sampler_data) > 0:
@@ -241,7 +241,7 @@ class MRI(barycentricRationalFunction):
     
 class gMRI(MRI):
     def __init__(self, sampler, energy_matrix, eps_stab = None,
-                 **starting_sampler_data):
+                 starting_sampler_data):
         """
         Initialize greedy MRI.
         
@@ -249,8 +249,8 @@ class gMRI(MRI):
             sampler, energy_matrix: arguments of samplingEngine;
             eps_stab(optional): tolerance for SVD stability check; defaults to
                 None, i.e., no stability check;
-            starting_sampler_data(optional): keyword arguments for loading
-                precomputed samples in samplingEngine.
+            starting_sampler_data(optional): dict of keyword arguments for
+                loading precomputed samples in samplingEngine.
         """
         self.sampler = samplingEngine(sampler, energy_matrix)
         if len(starting_sampler_data) > 0:
