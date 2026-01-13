@@ -4,7 +4,7 @@ from .mri import barycentricRationalFunctionMulti, MRI, gMRI, StabilityError
 __all__ = ['buildMRI', 'buildgMRI']
 
 def buildMRI(sampler, energy_matrix, zs, eps_stab = None, subdivisions = 1,
-             starting_sampler_data):
+             starting_sampler_data = None):
     """
     Build MRI with potential subdivisions of parameter range.
     
@@ -21,6 +21,7 @@ def buildMRI(sampler, energy_matrix, zs, eps_stab = None, subdivisions = 1,
     Returns:
         List of trained MRIs.
     """
+    if starting_sampler_data is None: starting_sampler_data = {}
     zs = np.array(zs).flatten()
     n = len(zs)
     idx_split = np.round(np.linspace(0, n, subdivisions + 1)).astype(int)
@@ -39,7 +40,7 @@ def buildMRI(sampler, energy_matrix, zs, eps_stab = None, subdivisions = 1,
 
 def buildgMRI(sampler, energy_matrix, zs, tol, eps_stab = None, nmax = 1000,
               track_indicator = False, bisections = 0,
-              starting_sampler_data):
+              starting_sampler_data = None):
     """
     Build gMRI with potential bisections of parameter range.
     
@@ -62,6 +63,7 @@ def buildgMRI(sampler, energy_matrix, zs, tol, eps_stab = None, nmax = 1000,
     Returns:
         List of trained gMRIs.
     """
+    if starting_sampler_data is None: starting_sampler_data = {}
     is_bisection_auto = (isinstance(bisections, str)
                       and bisections.upper() == "AUTO")
     if bisections: track_indicator = False
