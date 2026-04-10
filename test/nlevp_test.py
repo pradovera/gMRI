@@ -43,10 +43,10 @@ engine = orthogonalizationEngine(energyMatrix)
 
 if approximation_strategy == "MRI":
     app = buildMRI(solve, energyMatrix, np.linspace(*k2s, 101),
-                   eps_stab, subdivisions = 2 ** int(bisections))
+                   eps_stab, bisections = bisections, is_1d = True)
 elif approximation_strategy == "gMRI":
     app = buildgMRI(solve, energyMatrix, np.linspace(*k2s, 10001),
-                    1e-3, eps_stab, bisections = bisections)
+                    1e-3, eps_stab, bisections = bisections, is_1d = True)
 #poles = app.poles()
 poles = [app_.poles() for app_ in app.apps] # only for coloring
 
@@ -64,14 +64,14 @@ k2stride = 40
 k2testCoarse = k2test[::k2stride]
 normEx = np.empty(len(k2testCoarse))
 for j, k2 in enumerate(k2testCoarse):
-    normEx[j] = engine.norm(solve(k2)).flatten()
+    normEx[j] = engine.norm(solve(k2))[0]
 
 ### PLOTS
 plt.figure()
 plt.semilogy(k2testCoarse, normEx, 'o')
 plt.semilogy(k2test, normApp)
 for app_ in app.apps:
-    plt.semilogy(app_.supp[0], [np.min(normApp)] * app_.supp.shape[1], 'x')
+    plt.semilogy(app_.support, [np.min(normApp)] * app_.nsupport, 'x')
 plt.legend(["Exact", "Approx"])
 plt.xlabel("k"), plt.ylabel("||u(k)||"), plt.grid()
 plt.show()
